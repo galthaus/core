@@ -12,6 +12,8 @@ repo --name=a-updates --baseurl=http://mirrors.kernel.org/centos/6/updates/$base
 repo --name=a-extras  --baseurl=http://mirrors.kernel.org/centos/6/extras/$basearch
 repo --name=a-live    --baseurl=http://www.nanotechnologies.qc.ca/propos/linux/centos-live/$basearch/live
 repo --name=a-wsman   --baseurl=http://download.opensuse.org/repositories/Openwsman/CentOS_CentOS-6
+repo --name=a-wsman   --baseurl=http://download.opensuse.org/repositories/Openwsman/CentOS_CentOS-6
+repo --name=a-epel    --baseurl=http://mirrors.kernel.org/fedora-epel/6/$basearch
 %packages
 @core
 OpenIPMI
@@ -72,6 +74,7 @@ wsmancli
 yum
 zlib
 zlib-devel
+salt-minion
 
 %post
 

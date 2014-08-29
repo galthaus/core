@@ -5,6 +5,8 @@
   "crowbar-installed-node":"hide",
   "chef-server":"jigs",
   "chef-client":"jigs",
+  "saltstack-master":"jigs",
+  "saltstack-minion":"jigs",
   "provisioner-os-install":"os",
   "network-server":"network",
   "network-admin":"network",

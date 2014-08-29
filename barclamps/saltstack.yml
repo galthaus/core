@@ -1,0 +1,65 @@
+# Copyright 2014, Greg Althaus
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+roles:
+  - name: saltstack-master
+    jig: script
+    description: 'Provides a saltstack-master instance.'
+    attribs:
+      - name: saltstack-master_deploy
+        description: 'Whether to deploy our own salt master or not.'
+        map: 'saltstack/master/deploy'
+      - name: saltstack-master_ip
+        description: 'IP that minions should use to talk to the salt master'
+        map: 'saltstack/master/ip'
+      - name: saltstack-master_public_key
+        description: 'Public Key of Master'
+        map: 'saltstack/master/public_key'
+      - name: saltstack-master_private_key
+        description: 'Private Key of Master'
+        map: 'saltstack/master/private_key'
+  - name: saltstack-minion
+    jig: script
+    description: 'Provides a saltstack-minion.'
+    requires:
+      - saltstack-master
+    flags:
+      - implicit
+    attribs:
+      - name: saltstack-minion_name
+        description: 'Minion name for this node'
+        map: 'saltstack/minion/name'
+      - name: saltstack-minion_public_key
+        description: 'Private Key of Minioin'
+        map: 'saltstack/minion/public_key'
+      - name: saltstack-minion_private_key
+        description: 'Private Key of Minion'
+        map: 'saltstack/minion/private_key'
+    wants-attribs:
+      - saltstack-master_ip
+  - name: saltstack-keys
+    jig: script
+    description: 'Update client keys'
+    requires:
+      - saltstack-master
+  - name: saltstack-standalone
+    jig: script
+    description: 'Configures saltstack-minion for standalone for a node.'
+    flags:
+      - implicit
+    attribs:
+      - name: saltstack-minion_client_name
+        description: 'The client name that saltstack-minion should use'
+        map: 'crowbar/saltstack-minion-standalone/name'

@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+#GREG saltstack should come in more auto, but not sure.
+
 roles:
   # Crowbar  Core
   - name: crowbar-admin-node
@@ -27,6 +29,9 @@ roles:
       - provisioner-dhcp-database
       - provisioner-repos
       - provisioner-docker-setup
+      - saltstack-master
+      - saltstack-minion
+      - saltstack-keys
     conflicts:
       - crowbar-managed-node
   - name: crowbar-managed-node
@@ -40,6 +45,7 @@ roles:
       - dns-client
       - logging-client
       - ntp-client
+      - saltstack-minion
   - name: crowbar-installed-node
     description: "Crowbar Node Ready Checkpoint"
     jig: noop

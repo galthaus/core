@@ -33,6 +33,8 @@ barclamps:
     description: "Network Configuration"
   - name: chef
     description: "Chef CMDB & DevOps Framework"
+  - name: saltstack
+    description: "SaltStack CMDB & DevOps Framework"
   - name: deployer
     description: "Discover and Inventory Systems (aka Sledgehammer)"
   - name: provisioner
@@ -66,6 +68,14 @@ jigs:
     class: 'BarclampChef::SoloJig'
     description: "Allow Crowbar to manage nodes using chef-solo"
     implementor: chef-solo
+  - name: saltstack
+    class: 'BarclampSaltstack::Jig'
+    description: "Allow Crowbar to manage nodes using SaltStack"
+    implementor: saltstack-minion
+  - name: saltstack-standalone
+    class: 'BarclampSaltstack::StandaloneJig'
+    description: "Allow Crowbar to manage nodes using SaltStack standalone"
+    implementor: saltstack-standalone
   - name: puppet-sa
     class: 'BarclampPuppet::SaJig'
     description: "Puppet jig for using standalone puppet agent"
@@ -92,6 +102,7 @@ debs:
       - deb-src http://security.ubuntu.com/ubuntu precise-security main restricted universe multiverse
       - deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main
       - deb http://get.docker.io/ubuntu docker main
+      - deb http://ppa.launchpad.net/saltstack/salt/ubuntu precise main
     pkgs:
       - rpcbind
   #repos:
@@ -152,6 +163,9 @@ debs:
     - ldap-utils
     - db4.8-util
     - slapd
+    # SaltStack
+    - salt-master
+    - salt-minion
     # rabbitmq stuff
     - rabbitmq-server
     # ruby stuff
@@ -211,6 +225,7 @@ debs:
       - deb-src http://security.ubuntu.com/ubuntu trusty-security main restricted universe multiverse
       - deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main
       - deb http://get.docker.io/ubuntu docker main
+      - deb http://ppa.launchpad.net/saltstack/salt/ubuntu trusty main
     pkgs:
       - rpcbind
   #repos:
@@ -271,6 +286,9 @@ debs:
     - ldap-utils
     - db4.8-util
     - slapd
+    # SaltStack
+    - salt-master
+    - salt-minion
     # rabbitmq stuff
     - rabbitmq-server
     # ruby stuff
@@ -348,6 +366,9 @@ rpms:
       - openldap-clients
       - krb5-workstation
       - vim-enhanced
+      # SaltStack
+      - salt-master
+      - salt-minion
       # network
       - vconfig
       - iptables-ipv6
@@ -398,6 +419,9 @@ rpms:
       - openldap-clients
       - krb5-workstation
       - vim-enhanced
+      # SaltStack
+      - salt-master
+      - salt-minion
       # network
       - vconfig
       - iptables-ipv6
@@ -481,6 +505,9 @@ rpms:
       - zlib-devel
       - openssl-devel
     pkgs:
+      # SaltStack
+      - salt-master
+      - salt-minion
       # openldap stuff
       - openldap
       - openldap-servers
@@ -545,6 +572,9 @@ rpms:
       - openssl
       - libssh-devel
       - vim
+      # SaltStack
+      - salt-master
+      - salt-minion
       # network
       - vlan
       # provisioner
