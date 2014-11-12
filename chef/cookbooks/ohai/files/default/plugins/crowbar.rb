@@ -138,13 +138,16 @@ networks.each do |network|
   sw_port = -1
   sw_port_name = nil
 
-  line = IO.readlines(tcpdump_out).grep(/Subtype Interface Name/).join ''
+  line = IO.readlines(tcpdump_out).grep(/Subtype Local/).join ''
   #Chef::Log.debug("subtype intf name line: #{line}")
   if line =~ %r!(\d+)/\d+/(\d+)!
     sw_unit, sw_port = $1, $2
   end
   if line =~ /: Unit (\d+) Port (\d+)/
     sw_unit, sw_port = $1, $2
+  end
+  if line =~ /: g(\d+)/
+    sw_unit, sw_port = 0, $1
   end
   if line =~ %r!: (\S+ (\d+)/(\d+))!
     sw_port_name, sw_unit, sw_port = $1, $2, $3
@@ -164,7 +167,7 @@ networks.each do |network|
   crowbar_ohai[:switch_config][network][:interface] = network
   crowbar_ohai[:switch_config][network][:mac] = mac_map[network].downcase
   crowbar_ohai[:switch_config][network][:switch_name] = sw_name
-  crowbar_ohai[:switch_config][network][:switch_port] = sw_port
+  crowbar_oai[:switch_config][network][:switch_port] = sw_port
   crowbar_ohai[:switch_config][network][:switch_port_name] = sw_port_name
   crowbar_ohai[:switch_config][network][:switch_unit] = sw_unit
 end
