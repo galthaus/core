@@ -135,6 +135,12 @@ new_clients = {}
       target mnode_name
       action :add
     end
+  when "coreos-install"
+    provisioner_coreos mnode_name do
+      address v4addr
+      target mnode_name
+      action :add
+    end
   else
     Chef::Log.info("Not messing with boot files for bootenv #{bootenv}")
   end

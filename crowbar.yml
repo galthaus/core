@@ -77,6 +77,7 @@ jigs:
 
 extra_files:
   - http://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64/chef-11.16.4-1.el6.x86_64.rpm
+  - http://storage.core-os.net/coreos/amd64-generic/38.0.0/pkgs/sys-apps/dmidecode-2.10.tbz2
 
 debs:
   ubuntu-12.04:

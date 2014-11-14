@@ -143,6 +143,7 @@ EOC
   pkgtype = case
             when os =~ /^(ubuntu|debian)/ then "debs"
             when os =~ /^(redhat|centos|suse|fedora)/ then "rpms"
+            when os =~ /^(coreos)/ then "none"
             else raise "Unknown OS type #{os}"
             end
   # If we are running in online mode, we need to do a few extra tasks.
@@ -232,7 +233,7 @@ EOC
     '%os_site%'         => web_path,
     '%os_install_site%' => os_install_site
   }
-  append = params["append"]
+  append = params["append"] || ""
 
   # Sigh.  There has to be a more elegant way.
   replaces.each { |k,v|
@@ -280,3 +281,27 @@ EOC
     end
   end
 end
+
+# Build coreos chef code tgz - fix ip issue for ohai and dmidecode
+bash "Build CoreOS chef code" do
+  code <<EOC
+set -e -x
+cp -r /opt/chef /tmp
+cd /tmp/chef
+while read file; do
+  sed -i "s:/sbin/ip:/bin/ip:g" "$file"
+done < <(find . -type f | xargs grep -l "/sbin/ip")
+while read file; do
+  sed -i "s:"dmidecode":"/opt/chef/dmidecode/usr/sbin/dmidecode":g" "$file"
+done < <(find . -type f | xargs grep -l 'shell_out("dmidecode")')
+mkdir -p /tmp/chef/dmidecode
+cd /tmp/chef/dmidecode
+bzip2 -d -c #{tftproot}/files/dmidecode-2.10.tbz2 | tar xf -
+cd /tmp
+tar -zcf #{tftproot}/files/coreos-chef.tgz chef
+cd
+rm -rf /tmp/chef
+EOC
+  not_if do File.file?("#{tftproot}/files/coreos-chef.tgz") end
+end
+
