@@ -28,7 +28,13 @@ sudo mkdir -p /mnt/opt/opencrowbar/bin
 sudo curl -s -f -L -o /mnt/opt/opencrowbar/bin/crowbar_join.sh "<%=@provisioner_web%>/nodes/$HOSTNAME/crowbar_join.sh"
 sudo chmod +x /mnt/opt/opencrowbar/bin/crowbar_join.sh
 
+# Make sure the ssh script jig will work correctly.
 sudo echo "AcceptEnv http_proxy https_proxy no_proxy PATH" >> /mnt/etc/ssh/sshd_config
+sudo echo "PermitUserEnvironment yes" >> /mnt/etc/ssh/sshd_config
+sudo chmod 600 /mnt/etc/ssh/sshd_config
+
+sudo echo "PATH=/usr/bin:/bin:/usr/sbin:/sbin:/opt/bin:/opt/chef/bin:/opt/opencrowbar/core/bin" >> /mnt/root/.ssh/environment
+sudo chmod 600 /mnt/root/.ssh/environment
 
 sudo umount /mnt
 

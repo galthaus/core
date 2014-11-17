@@ -292,8 +292,8 @@ while read file; do
   sed -i "s:/sbin/ip:/bin/ip:g" "$file"
 done < <(find . -type f | xargs grep -l "/sbin/ip")
 while read file; do
-  sed -i "s:"dmidecode":"/opt/chef/dmidecode/usr/sbin/dmidecode":g" "$file"
-done < <(find . -type f | xargs grep -l 'shell_out("dmidecode")')
+  sed -i 's:"dmidecode":"/opt/chef/dmidecode/usr/sbin/dmidecode":g' "$file"
+done < <(find . -type f | xargs grep -l 'shell_out("dmidecode")' | grep -v spec)
 mkdir -p /tmp/chef/dmidecode
 cd /tmp/chef/dmidecode
 bzip2 -d -c #{tftproot}/files/dmidecode-2.10.tbz2 | tar xf -
