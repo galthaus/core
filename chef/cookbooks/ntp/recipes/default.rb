@@ -28,10 +28,12 @@ else
 end
 
 user "ntp"
+
 template "/etc/ntp.conf" do
   owner "root"
   group "root"
   mode 0644
+  force_unlink true
   source "ntp.conf.erb"
   variables(:ntp_servers => ntp_servers)
   notifies :restart, "service[ntp]"
@@ -46,7 +48,7 @@ file "/etc/network/if-up.d/ntpdate" do
 end if ::File.exists?("/etc/network/if-up.d/ntpdate")
 
 service "ntp" do
-  service_name "ntpd" if node[:platform] =~ /^(centos|redhat|fedora)$/
+  service_name "ntpd" if node[:platform] =~ /^(coreos|centos|redhat|fedora)$/
   supports :restart => true, :status => true, :reload => true
   running true
   enabled true
