@@ -14,7 +14,7 @@
 
 class Service < Role
 
-  def internal_do_transition(nr, data, service_name, service_attribute)
+  def internal_do_transition(nr, data, service_name, service_attribute, keys = {})
     runlog = []
     addr_arr = []
     runlog << "Getting #{service_name} information from consul"
@@ -57,6 +57,8 @@ class Service < Role
       runlog << "Setting #{service_name} attribute"
       Attrib.set(service_attribute, nr, addr_arr, :system)
     end
+
+    # GREG: Read keys to lookup consul keys to crowbar keys
 
     Rails.logger.info("Finished waiting for #{service_name}: #{addr_arr.length} found")
     nr.runlog = runlog.join("\n")

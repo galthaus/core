@@ -56,7 +56,7 @@ if ! which salt-minion; then
 fi
 
 # Figure master to config
-ip=$(read_attribute "saltstack/master/ip")
+ip=$(read_attribute "saltstack/masters/ips")
 name=$(read_attribute "saltstack/minion/name")
 
 if [[ "$name" == "" ]]; then

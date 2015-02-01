@@ -19,6 +19,7 @@ roles:
     description: 'SaltStack Platform'
     requires:
       - saltstack-minion
+      - saltstack-master
     flags:
       - milestone
   - name: saltstack-master
@@ -28,27 +29,33 @@ roles:
       - cluster
     requires:
       - crowbar-installed-node
+      - consul
     attribs:
-      - name: saltstack-master_ip
-        description: 'IP that minions should use to talk to the SaltStack Master'
-        map: 'saltstack/master/ip'
-        schema:
-          type: str
-          required: false
       - name: saltstack-master_public_key
         description: 'Public Key of Master'
         map: 'saltstack/master/public_key'
       - name: saltstack-master_private_key
         description: 'Private Key of Master'
         map: 'saltstack/master/private_key'
-      - name: saltstack-master_keys
-        description: 'Public Keys of Minions'
-        map: 'saltstack/master/keys'
+  - name: saltstack-service
+    jig: role-provided
+    flags:
+      - service
+    attribs:
+      - name: saltstack-masters
+        description: 'Saltstack masters that should be used for this deployment'
+        map: 'saltstack/masters/ips'
         schema:
-          type: map
-          mapping:
-            =:
-              type: str
+          type: seq
+          sequence:
+            - type: str
+              pattern: /[0-9a-f:.]*/
+      - name: saltstack-masters_public_key
+        description: 'Public Key of Masters in Cluster'
+        map: 'saltstack/masters/public_key'
+        schema:
+          type: str
+          required: true
   - name: saltstack-minion
     jig: script
     description: 'Provides a saltstack-minion.'
@@ -65,4 +72,5 @@ roles:
         description: 'Private Key of Minion'
         map: 'saltstack/minion/private_key'
     wants-attribs:
-      - saltstack-master_ip
+      - saltstack-masters
+      - saltstack-masters_public_key

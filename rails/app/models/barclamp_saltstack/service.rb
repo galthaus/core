@@ -1,4 +1,4 @@
-# Copyright 2014, Greg Althaus
+# Copyright 2015, Greg Althaus
 # 
 # Licensed under the Apache License, Version 2.0 (the "License"); 
 # you may not use this file except in compliance with the License. 
@@ -13,21 +13,10 @@
 # limitations under the License. 
 # 
 
-class BarclampSaltstack::Master < Role
+class BarclampSaltstack::Service < Service
 
-  def on_proposed(nr)
-    node_roles.each do |the_master_nr|
-      next if the_master_nr.deployment != nr.deployment
-
-      m_pub = (Attrib.get("saltstack-master_public_key", the_master_nr) rescue nil)
-      m_priv = (Attrib.get("saltstack-master_private_key", the_master_nr) rescue nil)
-      if m_pub and m_priv
-        Attrib.set("saltstack-master_public_key", nr, m_pub, :system)
-        Attrib.set("saltstack-master_private_key", nr, m_priv, :system)
-        break
-      end
-    end
+  def do_transition(nr, data)
+    internal_do_transition(nr, data, "saltstack-service", "saltstack_masters", { "saltstack-masters_public_key" => "consul-key-string"})
   end
 
 end
-
