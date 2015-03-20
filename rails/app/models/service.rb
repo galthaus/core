@@ -14,6 +14,18 @@
 
 class Service < Role
 
+  def my_faraday_connection
+    conn = Faraday.new(:url => Diplomat.configuration.url, :proxy => "http://127.0.0.1:8123") do |faraday|
+      faraday.request  :url_encoded
+      Diplomat.configuration.middleware.each do |middleware|
+        faraday.use middleware
+      end
+      faraday.adapter  Faraday.default_adapter
+      faraday.use      Faraday::Response::RaiseError
+    end
+    conn
+  end
+
   def internal_do_transition(nr, data, service_name, service_attribute)
     runlog = []
     addr_arr = []
@@ -26,7 +38,7 @@ class Service < Role
       begin
         count += 1
         break if count > 20
-        pieces = Diplomat::Service.get(service_name, :all, options, meta)
+        pieces = Diplomat::Service.new(my_faraday_connection).get(service_name, :all, options, meta)
         if pieces and pieces.empty?
           Rails.logger.info("#{service_name} not available ... wait 10m or next update")
           runlog << "#{service_name} not available ... wait 10m or next update"
