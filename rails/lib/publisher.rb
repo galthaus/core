@@ -15,52 +15,54 @@
 #
 
 class Publisher
-  @@channel = nil
   @@connection = nil
   @@success = false
+  @@semaphore = Mutex.new
 
   def self.get_channel
-    return @@channel if @@channel
+    connection = nil
+    @@semaphore.synchronize do
+      unless @@connection
+        # Lookup amqp service and build url for bunny
+        s = ConsulAccess.getService('amqp-service')
+        if s == nil || s.ServiceAddress == nil
+          return nil
+        end
+        addr = IP.coerce(s.ServiceAddress)
+        hash = {}
+        hash[:user] = 'crowbar'
+        hash[:pass] = 'crowbar'
+        if addr.v6?
+          hash[:host] = "[#{addr.addr}]"
+        else
+          hash[:host] = addr.addr
+        end
+        hash[:vhost] = '/opencrowbar'
+        hash[:port] = s.ServicePort.to_i
 
-    unless @@connection
-      # Lookup amqp service and build url for bunny
-      s = ConsulAccess.getService('amqp-service')
-      if s == nil || s.ServiceAddress == nil
-        return nil
+        Rails.logger.debug("Attempting to connection to AMQP service: #{hash}")
+        @@connection = Bunny.new(hash)
+        @@connection.start
       end
-      addr = IP.coerce(s.ServiceAddress)
-      hash = {}
-      hash[:user] = 'crowbar'
-      hash[:pass] = 'crowbar'
-      if addr.v6?
-        hash[:host] = "[#{addr.addr}]"
-      else
-        hash[:host] = addr.addr
-      end
-      hash[:vhost] = '/opencrowbar'
-      hash[:port] = s.ServicePort.to_i
-
-      Rails.logger.debug("Attempting to connection to AMQP service: #{hash}")
-      @@connection = Bunny.new(hash)
-      @@connection.start
+      connection = @@connection
     end
-    @@channel = @@connection.create_channel
+    connection.create_channel
   end
 
-  def self.close_channel
+  def self.close_channel(channel)
     begin
-      @@channel.close if @@channel
+      channel.close if channel
     rescue Exception => e
       Rails.logger.fatal("publish_event close channel failed: #{e.message}") if @@success
-    ensure
-      @@channel = nil
     end
-    begin
-      @@connection.close if @@connection
-    rescue Exception => e
-      Rails.logger.fatal("publish_event close connection failed: #{e.message}") if @@success
-    ensure
-      @@connection = nil
+    @@semaphore.synchronize do
+      begin
+        @@connection.close if @@connection
+      rescue Exception => e
+        Rails.logger.fatal("publish_event close connection failed: #{e.message}") if @@success
+      ensure
+        @@connection = nil
+      end
     end
   end
 
@@ -68,6 +70,7 @@ class Publisher
   # Note that RabbitMQ does not care about the payload -
   # we will be using JSON-encoded strings
   def self.publish_event(who, type, message = {})
+    channel = nil
     begin
       channel = self.get_channel
       unless channel
@@ -80,7 +83,7 @@ class Publisher
       x.publish(message.to_json, :routing_key => "#{who}.#{type}")
     rescue Exception => e
       Rails.logger.fatal("publish_event failed: #{e.message}") if @@success
-      self.close_channel
+      self.close_channel(channel)
     end
   end
 
