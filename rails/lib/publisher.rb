@@ -81,6 +81,7 @@ class Publisher
       x = channel.topic("opencrowbar")
       # and simply publish message
       x.publish(message.to_json, :routing_key => "#{who}.#{type}")
+      channel.close
     rescue Exception => e
       Rails.logger.fatal("publish_event failed: #{e.message}") if @@success
       self.close_channel(channel)
