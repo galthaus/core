@@ -26,7 +26,7 @@ class Publisher
       # Lookup amqp service and build url for bunny
       s = ConsulAccess.getService('amqp-service')
       if s == nil || s.ServiceAddress == nil
-        raise "AMQP Service not available"
+        return nil
       end
       addr = IP.coerce(s.ServiceAddress)
       hash = {}
@@ -48,10 +48,20 @@ class Publisher
   end
 
   def self.close_channel
-    @@channel.close if @@channel
-    @@connection.close if @@connection
-    @@connection = nil
-    @@channel = nil
+    begin
+      @@channel.close if @@channel
+    rescue Exception => e
+      Rails.logger.fatal("publish_event close channel failed: #{e.message}") if @@success
+    ensure
+      @@channel = nil
+    end
+    begin
+      @@connection.close if @@connection
+    rescue Exception => e
+      Rails.logger.fatal("publish_event close connection failed: #{e.message}") if @@success
+    ensure
+      @@connection = nil
+    end
   end
 
   # In order to publish message we need a exchange name.
@@ -60,10 +70,14 @@ class Publisher
   def self.publish_event(who, type, message = {})
     begin
       channel = self.get_channel
+      unless channel
+        Rails.logger.fatal("publish_event: failed to create channel") if @@success
+        return
+      end
+      @@success = true
       x = channel.topic("opencrowbar")
       # and simply publish message
       x.publish(message.to_json, :routing_key => "#{who}.#{type}")
-      @@success = true
     rescue Exception => e
       Rails.logger.fatal("publish_event failed: #{e.message}") if @@success
       self.close_channel
