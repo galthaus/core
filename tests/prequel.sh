@@ -34,7 +34,7 @@ launch_admin() {
         set -e
         return 0
     fi
-    die "Failed to launch docker admin container"
+    die "Failed to launch docker admin container: $DOCKER_ID"
 }
 
 # Bring Rebar up.
